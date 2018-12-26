@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Player;
 use Doctrine\ORM\Query;
-use Datetime;
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 
 class PlayerController extends AbstractController
@@ -39,9 +39,10 @@ class PlayerController extends AbstractController
             ->find($id);
 
         if (!$player) {
-            throw $this->createNotFoundException(
-                'No product found for id '. $id
-            );
+            return $this->json([
+                'result' => 'error',
+                'message' => 'entity_not_found',
+            ], 404);
         }
 
         $player = [
@@ -80,7 +81,7 @@ class PlayerController extends AbstractController
 
         $player->setDob($dob);
 
-        $player->setCreatedAt($datetime = new Datetime);
+        $player->setCreatedAt($datetime = new DateTime);
         $player->setCreatedAt($datetime);
 
         $entityManager->persist($player);
@@ -94,18 +95,65 @@ class PlayerController extends AbstractController
     }
 
     /**
-     * @Route("/api/players", methods={"PUT"})
+     * @Route("/api/players/{id}", methods={"PUT"})
      */
-    public function update()
+    public function update($id, Request $request)
     {
+        $entityManager = $this->getDoctrine()->getManager();
 
+        $player = $entityManager->getRepository(Player::class)->find($id);
+
+        if (!$player) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'entity_not_found',
+            ], 404);
+        }
+
+        $dob = DateTime::createFromFormat('Y-m-d', $request->query->get('dob'));
+
+        $player->setFirstName(
+            $request->query->get('first_name')
+        );
+
+        $player->setLastName(
+            $request->query->get('last_name')
+        );
+
+        $player->setDob($dob);
+
+        $entityManager->flush();
+
+        return $this->json([
+            'result' => 'success',
+            'data' => ['id' => $player->getId()],
+        ]);
     }
 
     /**
      * @Route("/api/players/{id}", methods={"DELETE"})
      */
-    public function delete()
+    public function delete($id)
     {
+        $entityManager = $this->getDoctrine()->getManager();
 
+        $player = $entityManager->getRepository(Player::class)->find($id);
+
+        if (!$player) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'entity_not_found',
+            ], 404);
+        }
+
+        $playerId = $player->getId();
+
+        $entityManager->remove($player);
+        $entityManager->flush();
+
+        return $this->json([
+            'result' => 'success',
+            'data' => ['deleted_id' => $playerId],
+        ]);
     }
 }
