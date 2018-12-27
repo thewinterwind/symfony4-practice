@@ -19,6 +19,7 @@ class PlayerRepository extends ServiceEntityRepository
         parent::__construct($registry, Player::class);
     }
 
+    /*
     public function findByExampleField($value)
     {
         return $this->createQueryBuilder('p')
@@ -30,4 +31,5 @@ class PlayerRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
+    */
 }

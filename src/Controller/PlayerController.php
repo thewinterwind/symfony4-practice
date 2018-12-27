@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Entity\Player;
-use Doctrine\ORM\Query;
-use DateTime;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\ORM\Query;
+use App\Entity\Player;
+use App\Validators\DateValidator;
+use DateTime;
 
 class PlayerController extends AbstractController
 {
@@ -32,8 +34,15 @@ class PlayerController extends AbstractController
     /**
      * @Route("/api/players/{id}", methods={"GET"})
      */
-    public function show($id)
+    public function show(int $id)
     {
+        if ($id < 1) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'id_must_be_positive',
+            ], 400);
+        }
+
        $player = $this->getDoctrine()
             ->getRepository(Player::class)
             ->find($id);
@@ -65,6 +74,22 @@ class PlayerController extends AbstractController
      */
     public function create(Request $request)
     {
+        if (!$request->query->get('first_name') || !$request->query->get('last_name')) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'must_provide_first_name_and_last_name',
+            ], 400);
+        }
+
+        $validator = new DateValidator;
+
+        if (!$validator->isValidDate($request->query->get('dob'))) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'dob_not_a_valid_date',
+            ], 400);
+        }
+
         $entityManager = $this->getDoctrine()->getManager();
 
         $player = new Player;
@@ -99,6 +124,13 @@ class PlayerController extends AbstractController
      */
     public function update($id, Request $request)
     {
+        if ($id < 1) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'id_must_be_positive',
+            ], 400);
+        }
+
         $entityManager = $this->getDoctrine()->getManager();
 
         $player = $entityManager->getRepository(Player::class)->find($id);
@@ -108,6 +140,15 @@ class PlayerController extends AbstractController
                 'result' => 'error',
                 'message' => 'entity_not_found',
             ], 404);
+        }
+
+        $validator = new DateValidator;
+
+        if (!$validator->isValidDate($request->query->get('dob'))) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'dob_not_a_valid_date',
+            ], 400);
         }
 
         $dob = DateTime::createFromFormat('Y-m-d', $request->query->get('dob'));
@@ -135,6 +176,13 @@ class PlayerController extends AbstractController
      */
     public function delete($id)
     {
+        if ($id < 1) {
+            return $this->json([
+                'result' => 'error',
+                'message' => 'id_must_be_positive',
+            ], 400);
+        }
+
         $entityManager = $this->getDoctrine()->getManager();
 
         $player = $entityManager->getRepository(Player::class)->find($id);
