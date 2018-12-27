@@ -43,9 +43,13 @@ class PlayerController extends AbstractController
             ], 400);
         }
 
-       $player = $this->getDoctrine()
+        $player = $this->getDoctrine()
             ->getRepository(Player::class)
             ->find($id);
+
+        $orderLimit = $user->getOrderLimit();
+
+        dd($orderLimit);
 
         if (!$player) {
             return $this->json([

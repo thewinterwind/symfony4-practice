@@ -1,0 +1,44 @@
+{# templates/blog/index.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Create Order{% endblock %}
+
+{% block body %}
+
+    <style type="text/css">
+        input {
+            width: 80px;
+            max-width: 80px;
+        }
+    </style>
+
+    {% if error == true %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+        {% endif %}
+
+    <div class="container">
+
+        <h3>Make an order</h3>
+
+        <form method="POST">
+            <br>
+            <label>Quantity</label>
+            <input class="form-control" type="text" name="product_id" value="1" width="20px" readonly />
+            <input type="hidden" name="user_id" value="3" />
+            <br>
+            <label>Select Feature</label>
+            <select type="hidden" name="feature">
+                <option value="Order" selected>Order</option>
+                <option value="Delivery">Delivery</option>
+                <option value="Invoice">Invoice</option>
+            </select>
+            <br>
+            <input class="form-control" type="submit" value="Submit" />
+        </form>
+
+    </div>
+
+{% endblock %}
